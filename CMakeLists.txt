@@ -10,4 +10,4 @@ include_directories( ${CURL_INCLUDE_DIRS} )
 add_executable(weather weather.c)
 
 
-target_link_libraries( weather ${CURL_LIBS} )
+target_link_libraries( weather ${CURL_LIBRARIES} )
