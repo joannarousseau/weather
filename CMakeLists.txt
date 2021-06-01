@@ -4,10 +4,11 @@ cmake_minimum_required(VERSION 3.12)
 project(weather)
 
 find_package( CURL REQUIRED )
-include_directories( ${CURL_INCLUDE_DIRS} )
+pkg_check_modules(JSON REQUIRED json-c)
+include_directories( ${CURL_INCLUDE_DIRS} ${JSON_INCLUDE_DIRS})
 
 # add the executable
 add_executable(weather weather.c)
 
 
-target_link_libraries( weather ${CURL_LIBRARIES} )
+target_link_libraries( weather ${CURL_LIBRARIES} ${JSON_LIBRARIES} )
