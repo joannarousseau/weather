@@ -42,7 +42,7 @@ static size_t received_data(char *data, size_t size, size_t nmemb, void *userp) 
     return nmemb;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char **argv) {
     //fetch environment variable that contains weather API key
     char *api_key = getenv("API_KEY_WEATHER");
     if (!api_key) {
