@@ -9,8 +9,8 @@
  *************************************************************************/
 static size_t received_data(char *data, size_t size, size_t nmemb, void *userp) {
     // size is always 1 and is not used
-    ((void) size);
-    ((void) userp);
+    (void) size;
+    (void) userp;
 
     // parse returned JSON data as city and weather forecast
     struct json_object *parsed_json;
