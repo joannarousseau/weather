@@ -12,13 +12,18 @@ static size_t received_data(char *data, size_t size, size_t nmemb, void *userp) 
     (void) size;
     (void) userp;
 
+    // 'nmemb' may be 0 if the received file is empty. Exit early.
+    if (nmemb == 0) {
+        return 0;
+    }
+
     // parse returned JSON data as city and weather forecast
     struct json_object *parsed_json;
     struct json_object *name; //city name
     struct json_object *main; //string where temperature is stored
     struct json_object *temperature;
 
-    // TODO: 'nmemb' may be 0 if the received file is empty. Exit early.
+
 
     // TODO: CURL does not guarantee that 'data' is null-terminated. Check this before
     // passing 'data' to json_tokener_parse().
