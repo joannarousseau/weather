@@ -41,16 +41,28 @@ static size_t received_data(char *data, size_t size, size_t nmemb, void *userp) 
     //get name of city
     struct json_object *name;
     json_object_object_get_ex(parsed_json, "name", &name);
-
-    // TODO: check error status codes from above and below ( return errors handler)
+    // check error status codes
+    if (!name) {
+        return 0;
+    }
 
     //get temperature from dict placed in main from parsed json
     struct json_object *main; //string where temperature is stored
     json_object_object_get_ex(parsed_json, "main", &main);
-    //get temp key/value pair from main
+    if (!main) {
+        return 0;
+    }
+    //get temp key/value pair from main to find temperature
     struct json_object *temperature;
     json_object_object_get_ex(main, "temp", &temperature);
-    //grab temperature value
+        if (!temperature) {
+        return 0;
+    }
+    //grab temperature value and check validity
+    int is_double = json_object_is_type(temperature, json_type_double);
+    if (is_double == 0){
+        return 0;
+    }
     double d_temperature = json_object_get_double(temperature);
 
     printf("The temperature in %s is %.2f °C\n", json_object_get_string(name), d_temperature);
