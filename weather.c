@@ -75,7 +75,7 @@ static size_t received_data(char *data, size_t size, size_t nmemb, void *userp) 
     }
     double d_temperature = json_object_get_double(temperature);
 
-    printf("The temperature in %s is %.2f °C\n", json_object_get_string(name), d_temperature);
+    printf("The temperature in %s is %.2f", json_object_get_string(name), d_temperature);
 
     return nmemb;
 }
@@ -96,26 +96,27 @@ int main(int argc, char **argv) {
         //check api key is not more than 33 characters long
         if ((current_char - api_key ) >= API_KEY_LEN) {
             fputs(API_KEY_ERROR, stderr);
-            return 1;
+            return EXIT_FAILURE	;
         }
         //check if a hexadecimal digit
         if (!isxdigit(*current_char)) {
             //it is not a hex digit
             fputs(API_KEY_ERROR, stderr);
-            return 1;
+            return EXIT_FAILURE	;
         }
         current_char++;
     }
     //check API key is correct length
     if (((current_char - api_key) + 1)!= API_KEY_LEN) {
         fputs(API_KEY_ERROR, stderr);
-        return 1;
+        return EXIT_FAILURE	;
     }
 
     // Choose unit want temperature in, can be imperial(Fahrenheit) or
     // metric(Celsius). Temperature in Kelvin is used by default if not declared
     // this allows override with command line arg (getopt)
     char *units = "metric";
+    char *unit_symbol = "°C";
     int c;
     while (1) {
         static struct option long_options[] = {
@@ -131,8 +132,27 @@ int main(int argc, char **argv) {
             break;
         switch (c) {
             case 'u':
-                //printf("option u with value %s\n", optarg);
+                //check "option u with value %s\n", optarg) is correct unit
                 units = optarg;
+                //if does not match a correct unit leave the default
+                int units_length = strlen(units);
+                for (int i = 0; i < units_length; i++) {
+                  units[i] = tolower(units[i]);
+                }
+                //if unit exists - change the unit_symbol 
+                if ((units, "standard") == 0) {
+                    unit_symbol = "K";
+                }
+                else if (strcmp(units, "metric") == 0) {
+                    unit_symbol = "°C";
+                }
+                else if (strcmp(units, "imperial") == 0) {
+                    unit_symbol = "°F";     
+                }
+                else {
+                    fprintf(stderr, "Usage: %s is not a correct unit, metric will be used\n", units);
+                    units = "metric";
+                }
                 break;
             default:
                 abort();
@@ -141,7 +161,7 @@ int main(int argc, char **argv) {
     /* Check mandatory arguments are present */
     if ((argc - optind) != 2) {
         fprintf(stderr, "Usage: %s city iso3166_country_code\n\tExample: %s Paris FR\n", argv[0], argv[0]);
-        return 1;
+        return EXIT_FAILURE	;
     }
     char *city = argv[optind];
     char *country_code = argv[optind + 1];
@@ -153,7 +173,7 @@ int main(int argc, char **argv) {
     //URL should never be longer than 2,048 characters for it to work on all browsers
     if (url_length > 2048) {
         printf("URL too large\n");
-        return 1;
+        return EXIT_FAILURE	;
     }
     char url[url_length];
     // add command line argv to URL
@@ -167,17 +187,19 @@ int main(int argc, char **argv) {
     CURLcode ret;
     CURL *hnd = curl_easy_init();
     if (!hnd) {
-        return 1;
+        return EXIT_FAILURE	;
     }
 
     curl_easy_setopt(hnd, CURLOPT_URL, url);
     curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, received_data);
+    
     // TODO: what if get 401 error(key error or dns issues) / 404 if city nor recognised
     // or if make more than 60 API calls a minute (429 error returned)
     ret = curl_easy_perform(hnd);
-
+    printf("%s\n", unit_symbol);
+    
     // TODO: check curl_easy_perform error docs
     curl_easy_cleanup(hnd);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
