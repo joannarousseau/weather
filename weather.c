@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <string.h>
+#include <getopt.h>
 
 // Constants:
 #define API_KEY_LEN 33
@@ -79,6 +80,7 @@ static size_t received_data(char *data, size_t size, size_t nmemb, void *userp) 
     return nmemb;
 }
 
+
 int main(int argc, char **argv) {
     //fetch environment variable that contains weather API key
     char *api_key = getenv("API_KEY_WEATHER");
@@ -110,27 +112,42 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    CURLcode ret;
-    CURL *hnd = curl_easy_init();
-    if (!hnd) {
+    // Choose unit want temperature in, can be imperial(Fahrenheit) or
+    // metric(Celsius). Temperature in Kelvin is used by default if not declared
+    // this allows override with command line arg (getopt)
+    char *units = "metric";
+    int c;
+    while (1) {
+        static struct option long_options[] = {
+            {"units", required_argument, 0, 'u'},
+            {0, 0, 0, 0}
+        };
+        /* getopt_long stores the option index here. */
+        int option_index = 0;
+        c = getopt_long(argc, argv, "u:", long_options, &option_index);
+
+        /* Detect the end of the options. */
+        if (c == -1)
+            break;
+        switch (c) {
+            case 'u':
+                //printf("option u with value %s\n", optarg);
+                units = optarg;
+                break;
+            default:
+                abort();
+        }
+    }
+    /* Check mandatory arguments are present */
+    if ((argc - optind) != 2) {
+        fprintf(stderr, "Usage: %s city iso3166_country_code\n\tExample: %s Paris FR\n", argv[0], argv[0]);
         return 1;
     }
-
-    // TODO: choose unit want temperature in, can be imperial(Fahrenheit) or
-    // metric(Celsius). Temperature in Kelvin is used by default
-    // if possible use locale as default and allow override with command line arg (getopt)
-
-    //GET city and country code FROM command line
-    if (argc < 3){
-        printf("Usage: argv[0] city iso3166_country_code\n Example: argv[0] Paris FR\n");
-        return 1;
-    }
-    char *city = argv[1];
-    char *country_code =argv[2];
-    printf("city is: %s country code is: %s\n", argv[1], argv[2]);
+    char *city = argv[optind];
+    char *country_code = argv[optind + 1];
 
     //sprintf URL together by adding key, city and country code
-    char *url_template = "https://api.openweathermap.org/data/2.5/weather?q=%s,%s&appid=%s&units=metric";
+    char *url_template = "https://api.openweathermap.org/data/2.5/weather?q=%s,%s&appid=%s&units=%s";
     int url_length = strlen(url_template);
     url_length = url_length + strlen(city) + strlen(country_code);
     //URL should never be longer than 2,048 characters for it to work on all browsers
@@ -143,10 +160,16 @@ int main(int argc, char **argv) {
     sprintf(
         url,
         url_template,
-        city, country_code, api_key
+        city, country_code, api_key, units
     );
 
     //Reach out to server and fetch data from openweathermap data returned is JSON
+    CURLcode ret;
+    CURL *hnd = curl_easy_init();
+    if (!hnd) {
+        return 1;
+    }
+
     curl_easy_setopt(hnd, CURLOPT_URL, url);
     curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, received_data);
     // TODO: what if get 401 error(key error or dns issues) / 404 if city nor recognised
