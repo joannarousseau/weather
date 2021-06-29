@@ -191,12 +191,16 @@ int main(int argc, char **argv) {
 
     curl_easy_setopt(hnd, CURLOPT_URL, url);
     curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, received_data);
+    curl_easy_setopt(hnd, CURLOPT_FAILONERROR, 1);
     
-    // TODO: what if get 401 error(key error or dns issues) / 404 if city nor recognised
+    // TODO: differentiate 401 error(key error)/ DNS issues / 404 if city not recognised
     // or if make more than 60 API calls a minute (429 error returned)
     CURLcode ret = curl_easy_perform(hnd);
-    
-    // TODO: check curl_easy_perform error docs
+    if (ret != CURLE_OK) {
+        fprintf(stderr, "Error\n");
+        curl_easy_cleanup(hnd);
+        return EXIT_FAILURE;
+    }
     curl_easy_cleanup(hnd);
 
     return EXIT_SUCCESS;
