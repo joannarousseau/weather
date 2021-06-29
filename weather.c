@@ -184,7 +184,6 @@ int main(int argc, char **argv) {
     );
 
     //Reach out to server and fetch data from openweathermap data returned is JSON
-    CURLcode ret;
     CURL *hnd = curl_easy_init();
     if (!hnd) {
         return EXIT_FAILURE	;
@@ -195,7 +194,7 @@ int main(int argc, char **argv) {
     
     // TODO: what if get 401 error(key error or dns issues) / 404 if city nor recognised
     // or if make more than 60 API calls a minute (429 error returned)
-    ret = curl_easy_perform(hnd);
+    CURLcode ret = curl_easy_perform(hnd);
     
     // TODO: check curl_easy_perform error docs
     curl_easy_cleanup(hnd);
