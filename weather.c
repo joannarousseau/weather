@@ -139,8 +139,8 @@ int main(int argc, char **argv) {
                 for (int i = 0; i < units_length; i++) {
                   units[i] = tolower(units[i]);
                 }
-                //if unit exists - change the unit_symbol 
-                if ((units, "standard") == 0) {
+                //if unit exists - change the unit_symbol
+                if (strcmp(units, "standard") == 0) {
                     unit_symbol = "K";
                 }
                 else if (strcmp(units, "metric") == 0) {
