@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
         }
         current_char++;
     }
-    //check API key is correct length
+    //check API key is sufficiently long (previous only checked that it was not too long)
     if (((current_char - api_key) + 1)!= API_KEY_LEN) {
         fputs(API_KEY_ERROR, stderr);
         return EXIT_FAILURE;
