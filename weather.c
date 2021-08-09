@@ -10,6 +10,8 @@
 // Constants:
 #define API_KEY_LEN 33
 static const char * const API_KEY_ERROR = "Please add correct key to environment variable API_KEY_WEATHER\n";
+
+#define MAX_URL_LENGTH 2000
 //global variable used both in main and functions
 static char *unit_symbol = "°C";
 
@@ -168,20 +170,20 @@ int main(int argc, char **argv) {
 
     //sprintf URL together by adding key, city and country code
     char *url_template = "https://api.openweathermap.org/data/2.5/weather?q=%s,%s&appid=%s&units=%s";
-    int url_length = strlen(url_template);
-    url_length = url_length + strlen(city) + strlen(country_code);
-    //URL should never be longer than 2,048 characters for it to work on all browsers
-    if (url_length > 2048) {
-        printf("URL too large\n");
-        return EXIT_FAILURE	;
-    }
-    char url[url_length];
+    char url[MAX_URL_LENGTH];
+
     // add command line argv to URL
-    sprintf(
+    int url_length = snprintf(
         url,
+        MAX_URL_LENGTH,
         url_template,
         city, country_code, api_key, units
     );
+    // Cap maximum URL length for compatibility
+    if (url_length >= MAX_URL_LENGTH) {
+        fprintf(stderr, "URL too large\n");
+        return EXIT_FAILURE;
+    }
 
     //Reach out to server and fetch data from openweathermap data returned is JSON
     CURL *hnd = curl_easy_init();
