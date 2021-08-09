@@ -89,6 +89,7 @@ int main(int argc, char **argv) {
     char *api_key = getenv("API_KEY_WEATHER");
     if (!api_key) {
         fputs("Please add key to environment variable API_KEY_WEATHER", stderr);
+        return EXIT_FAILURE;
     }
 
     // check and validate api key is correct format (check API to see if always same length and has correct characters)
