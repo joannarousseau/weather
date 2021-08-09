@@ -100,20 +100,20 @@ int main(int argc, char **argv) {
         //check api key is not more than 33 characters long
         if ((current_char - api_key ) >= API_KEY_LEN) {
             fputs(API_KEY_ERROR, stderr);
-            return EXIT_FAILURE	;
+            return EXIT_FAILURE;
         }
         //check if a hexadecimal digit
         if (!isxdigit(*current_char)) {
             //it is not a hex digit
             fputs(API_KEY_ERROR, stderr);
-            return EXIT_FAILURE	;
+            return EXIT_FAILURE;
         }
         current_char++;
     }
     //check API key is correct length
     if (((current_char - api_key) + 1)!= API_KEY_LEN) {
         fputs(API_KEY_ERROR, stderr);
-        return EXIT_FAILURE	;
+        return EXIT_FAILURE;
     }
 
     // Choose unit want temperature in, can be imperial(Fahrenheit) or
@@ -164,7 +164,7 @@ int main(int argc, char **argv) {
     /* Check mandatory arguments are present */
     if ((argc - optind) != 2) {
         fprintf(stderr, "Usage: %s city iso3166_country_code\n\tExample: %s Paris FR\n", argv[0], argv[0]);
-        return EXIT_FAILURE	;
+        return EXIT_FAILURE;
     }
     char *city = argv[optind];
     char *country_code = argv[optind + 1];
@@ -189,7 +189,7 @@ int main(int argc, char **argv) {
     //Reach out to server and fetch data from openweathermap data returned is JSON
     CURL *hnd = curl_easy_init();
     if (!hnd) {
-        return EXIT_FAILURE	;
+        return EXIT_FAILURE;
     }
 
     curl_easy_setopt(hnd, CURLOPT_URL, url);
